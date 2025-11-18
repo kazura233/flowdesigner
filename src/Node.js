@@ -84,7 +84,7 @@ export default class Node {
           }
         }
         if (!toNode) {
-          MsgBox.alert(`连线的目标节点${to}不存在`)
+          MsgBox.alert(`连线的目标节点${to}不存在<br>Node ${to} not exist`)
           return
         }
         const newConnection = new Connection(fromNode, { endX: 0, endY: 0 })
@@ -130,7 +130,7 @@ export default class Node {
         }
       }
       if (exist) {
-        MsgBox.alert('当前节点只允许创建一个.')
+        MsgBox.alert('当前节点只允许创建一个<br>Current Node only create one.')
         return false
       }
     }
@@ -206,8 +206,6 @@ export default class Node {
 
   _initFigure() {
     var context = this.context
-    var fromConnections = this.fromConnections
-    var toConnections = this.toConnections
     var _this = this
     var mouseOver = function (e, mouseX, mouseY) {
       if (this.dragging === true) {
@@ -284,11 +282,15 @@ export default class Node {
       var connection = context.currentConnection
       if (connection) {
         if (_this.in === 0) {
-          MsgBox.alert(`当前节点不允许有进入的连线.`)
+          MsgBox.alert(
+            `当前节点不允许有进入的连线.<br>Current node no incoming connections are allowed`
+          )
           return
         }
         if (_this.in !== -1 && _this.toConnections.length >= _this.in) {
-          MsgBox.alert(`当前节点进入的连线最多只能有${_this.in}条.`)
+          MsgBox.alert(
+            `当前节点进入的连线最多只能有${_this.in}条<br>Current node max incoming connections is ${_this.in}`
+          )
           return
         }
         connection.endX = x
@@ -315,15 +317,17 @@ export default class Node {
             }
           })
         } else {
-          MsgBox.alert('连线的起始节点不能为同一节点.')
+          MsgBox.alert('连线的起始节点不能为同一节点<br>Connection start/end must be different.')
         }
       } else {
         if (_this.out === 0) {
-          MsgBox.alert('当前节点不允许有出去的连线.')
+          MsgBox.alert('当前节点不允许有出去的连线<br>Current node has no outcoming connection')
           return
         }
         if (_this.out !== -1 && _this.fromConnections.length >= _this.out) {
-          MsgBox.alert(`当前节点出去的连线最多只能有${_this.out}条.`)
+          MsgBox.alert(
+            `当前节点出去的连线最多只能有${_this.out}条<br>Current node max outcoming connections is ${_this.out}`
+          )
           return
         }
         connection = new Connection(_this, { endX: x, endY: y })
@@ -437,6 +441,47 @@ export default class Node {
           figure._resetConnections()
         }
       })
+
+      if (selectionFigures.length == 1 && !(selectionFigures[0] instanceof Connection)) {
+        const selectFigure = selectionFigures[0]
+        const clientHeight = context.container[0].clientHeight
+        const clientX = selectFigure.rect.attrs.x + parseInt(selectFigure.rect.attrs.width / 2)
+        const clientY = selectFigure.rect.attrs.y + parseInt(selectFigure.rect.attrs.height / 2)
+        let horizontalLine = context.flowDesigner.horizontalLine
+        let verticalLine = context.flowDesigner.verticalLine
+        horizontalLine.css('top', event.clientY)
+        verticalLine.css('height', clientHeight)
+        verticalLine.css('left', event.clientX)
+        verticalLine.css('top', '80px')
+
+        const nodeName = selectFigure.name
+        for (let figure of context.allFigures) {
+          if (figure instanceof Connection) {
+            continue
+          }
+          if (figure.name != nodeName) {
+            let matchx = false,
+              matchy = false
+            const nodeX = figure.rect.attrs.x + parseInt(figure.rect.attrs.width / 2)
+            const nodeY = figure.rect.attrs.y + parseInt(figure.rect.attrs.height / 2)
+            if (Math.abs(nodeX - clientX) == 0) {
+              verticalLine.css('display', 'block')
+              matchx = true
+            } else {
+              verticalLine.css('display', 'none')
+            }
+            if (Math.abs(nodeY - clientY) == 0) {
+              horizontalLine.css('display', 'block')
+              matchy = true
+            } else {
+              horizontalLine.css('display', 'none')
+            }
+            if (matchy || matchx) {
+              break
+            }
+          }
+        }
+      }
     }
     var dragEnd = function () {
       _this.rect.dragging = false
@@ -494,6 +539,15 @@ export default class Node {
       })
       if (window._setDirty) {
         window._setDirty()
+      }
+      if (
+        context.selectionFigures.length == 1 &&
+        !(context.selectionFigures[0] instanceof Connection)
+      ) {
+        let horizontalLine = context.flowDesigner.horizontalLine
+        let verticalLine = context.flowDesigner.verticalLine
+        horizontalLine.css('display', 'none')
+        verticalLine.css('display', 'none')
       }
     }
     this.rect.drag(dragMove, dragStart, dragEnd)

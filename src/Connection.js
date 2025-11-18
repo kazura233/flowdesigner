@@ -418,7 +418,7 @@ export default class Connection {
     } else {
       const targetPointIndex = Math.round(pathInfo.length / 2) - 1
       const point = pathInfo[targetPointIndex]
-      pos = { x: point[1], y: point[2] }
+      pos = { x: parseInt(point[1]), y: parseInt(point[2]) }
     }
     if (this.text) {
       this.text.attr({ x: pos.x + 10, y: pos.y + 10, text: this.name })

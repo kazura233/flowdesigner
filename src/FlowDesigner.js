@@ -27,9 +27,15 @@ export default class FlowDesigner {
     this.nodeToolbar = $(`<div class="btn-group fd-node-toolbar" data-toggle="buttons"></div>`)
     container.append(this.nodeToolbar)
 
+    this.workspace = $('<div class="fd-workspace"></div>')
     this.canvasContainer = $(`<div class="fd-canvas-container"></div>`)
-    this.canvasContainer.css('height', $(window).height() - 100)
-    container.append(this.canvasContainer)
+    let height = $(window).height() - 100
+    if (height < 800) {
+      height = 800
+    }
+    this.canvasContainer.css('height', height)
+    this.workspace.append(this.canvasContainer)
+    container.append(this.workspace)
     this.context = new Context(this.canvasContainer)
     this.canvas = new Canvas(this.context)
     this.context.flowDesigner = this
@@ -38,9 +44,15 @@ export default class FlowDesigner {
     const propertyPanel = $('<div class="fd-property-panel"/>')
     this.canvasContainer.append(propertyPanel)
 
+    this.horizontalLine = $(`<div class="fd-horizontalLine" ></div>`)
+    this.verticalLine = $(`<div class="fd-verticalLine" ></div>`)
+    this.canvasContainer.append(this.horizontalLine)
+    this.canvasContainer.append(this.verticalLine)
+
     const propertyTab = $(`<ul class="nav nav-tabs">
             <li class="active">
-                <a href="${propContainerId}" data-toggle="tab">属性面板 <i class="glyphicon glyphicon-circle-arrow-down" style="color:#9E9E9E;font-size: 16px;vertical-align: middle;cursor: pointer" title="点击显示/隐藏属性面板" id="__prop_panel_tool__"></i></a>
+                <span data-toggle="tab">Property Panel </span>
+                <i class="fd fd-arrow-down icon-button" style="float:right; color:#9E9E9E;font-size: 16px;vertical-align: middle;cursor: pointer" title="Show/Hide" id="__prop_panel_tool__"></i>
             </li>
         </ul>`)
     propertyPanel.append(propertyTab)
@@ -49,22 +61,20 @@ export default class FlowDesigner {
     })
     this.propContainer = $(`<div id="${propContainerId}"/>`)
     const tabContent = $(`<div class="tab-content" style="min-height: 300px;padding:10px"/>`)
-    tabContent.append(
-      '<div class="text-info" style="margin-bottom:8px;color: #999999;">属性值修改后，请回车以确认</div>'
-    )
     tabContent.append(this.propContainer)
     propertyPanel.append(tabContent)
     propertyPanel.draggable()
+    this.propertyPanel = propertyPanel
     const propPanelTool = $('#__prop_panel_tool__')
     propPanelTool.click(function () {
       tabContent.toggle()
       const display = tabContent.css('display')
       if (!display || display === 'none') {
-        propPanelTool.removeClass('glyphicon-circle-arrow-down')
-        propPanelTool.addClass('glyphicon-circle-arrow-left')
+        propPanelTool.removeClass('fd-arrow-down')
+        propPanelTool.addClass('fd-arrow-right')
       } else {
-        propPanelTool.removeClass('glyphicon-circle-arrow-left')
-        propPanelTool.addClass('glyphicon-circle-arrow-down')
+        propPanelTool.removeClass('fd-arrow-right')
+        propPanelTool.addClass('fd-arrow-down')
       }
     })
     this._bindSnapToEvent()
@@ -157,19 +167,22 @@ export default class FlowDesigner {
 
     for (let btn of this.buttons) {
       const btnTool =
-        $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="${btn.tip}">
-                ${btn.icon}
-            </button>`)
+        $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="${btn.tip}">
+            <input type="radio" name="tools"> ${btn.icon}
+            </label>`)
       btnTool.click(function () {
+        if (btn.disabled) {
+          return
+        }
         btn.click.call(this)
       })
       this.toolbar.append(btnTool)
     }
 
     const selectTool =
-      $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="选择">
-            <i class="fd fd-select" style="color:#737383"></i>
-        </button>`)
+      $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Select">
+            <input type="radio" name="tools"> <i class="fd fd-select" style="color:#737383"></i>
+        </label>`)
     this.toolbar.append(selectTool)
     selectTool.click(function (e) {
       context.cancelConnection()
@@ -177,9 +190,9 @@ export default class FlowDesigner {
       _this.nodeToolbar.children('label').removeClass('active')
     })
     const connectionTool =
-      $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="在两节点间创建连接线">
-            <i class="fd fd-line" style="color:#737383"></i>
-        </button>`)
+      $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Connect Line">
+            <input type="radio" name="tools"> <i class="fd fd-line" style="color:#737383"></i>
+        </label>`)
     this.toolbar.append(connectionTool)
     connectionTool.click(function (e) {
       context.cancelConnection()
@@ -187,9 +200,9 @@ export default class FlowDesigner {
       _this.nodeToolbar.children('label').removeClass('active')
     })
     const undoTool =
-      $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="重做">
-            <i class="fd fd-undo" style="color:#737383"></i>
-        </button>`)
+      $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Redo">
+            <input type="radio" name="tools"> <i class="fd fd-undo" style="color:#737383"></i>
+        </label>`)
     this.toolbar.append(undoTool)
     undoTool.click(function (e) {
       context.cancelConnection()
@@ -201,9 +214,9 @@ export default class FlowDesigner {
       }
     })
     const redoTool =
-      $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="撤消">
-            <i class="fd fd-redo" style="color:#737383"></i>
-        </button>`)
+      $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Undo">
+            <input type="radio" name="tools"> <i class="fd fd-redo" style="color:#737383"></i>
+        </label>`)
     this.toolbar.append(redoTool)
     redoTool.click(function (e) {
       context.cancelConnection()
@@ -216,9 +229,9 @@ export default class FlowDesigner {
     })
 
     const snapTool =
-      $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="网格吸附">
-            <i class="fd fd-snapto" style="color:#737383"></i>
-        </button>`)
+      $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Snap to Grid">
+            <input type="radio" name="tools"> <i class="fd fd-snapto" style="color:#737383"></i>
+        </lab>`)
     this.toolbar.append(snapTool)
     snapTool.click(function (e) {
       context.cancelConnection()
@@ -227,9 +240,9 @@ export default class FlowDesigner {
       context.currentTool = context.selectTool
     })
     const removeTool =
-      $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="删除选择对象">
-            <i class="fd fd-delete" style="color:#737383"></i>
-        </button>`)
+      $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Delete">
+            <input type="radio" name="tools"> <i class="fd fd-delete" style="color:#737383"></i>
+        </label>`)
     this.toolbar.append(removeTool)
     removeTool.click(function (e) {
       context.cancelConnection()
@@ -240,10 +253,24 @@ export default class FlowDesigner {
         window._setDirty()
       }
     })
+
+    // const alignLeft=$(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Allign Left">
+    //     <input type="radio" name="tools"> <i class="fd fd-align-left"></i>
+    // </label>`);
+    // this.toolbar.append(alignLeft);
+    // alignLeft.click(function (e) {
+    //     context.cancelConnection();
+    //     event.eventEmitter.emit(event.ALIGN_LEFT);
+    //     _this.nodeToolbar.children('label').removeClass('active');
+    //     context.currentTool=context.selectTool;
+    //     if(window._setDirty){
+    //         window._setDirty();
+    //     }
+    // });
     const alignCenter =
-      $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="竖直居中">
-             <i class="fd fd-align-center"></i>
-        </button>`)
+      $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Vertical Middle">
+            <input type="radio" name="tools"> <i class="fd fd-align-center"></i>
+        </label>`)
     this.toolbar.append(alignCenter)
     alignCenter.click(function (e) {
       context.cancelConnection()
@@ -254,10 +281,37 @@ export default class FlowDesigner {
         window._setDirty()
       }
     })
+    // const alignRight=$(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Align Right">
+    //     <input type="radio" name="tools"> <i class="fd fd-align-right"></i>
+    // </label>`);
+    // this.toolbar.append(alignRight);
+    // alignRight.click(function (e) {
+    //     context.cancelConnection();
+    //     event.eventEmitter.emit(event.ALIGN_RIGHT);
+    //     _this.nodeToolbar.children('label').removeClass('active');
+    //     context.currentTool=context.selectTool;
+    //     if(window._setDirty){
+    //         window._setDirty();
+    //     }
+    // });
+
+    // const alignTop=$(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Align Top">
+    //     <input type="radio" name="tools"> <i class="fd fd-align-top"></i>
+    // </label>`);
+    // this.toolbar.append(alignTop);
+    // alignTop.click(function (e) {
+    //     context.cancelConnection();
+    //     event.eventEmitter.emit(event.ALIGN_TOP);
+    //     _this.nodeToolbar.children('label').removeClass('active');
+    //     context.currentTool=context.selectTool;
+    //     if(window._setDirty){
+    //         window._setDirty();
+    //     }
+    // });
     const alignMiddle =
-      $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="水平居中">
-             <i class="fd fd-align-middle"></i>
-        </button>`)
+      $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Horizontal Center">
+            <input type="radio" name="tools"> <i class="fd fd-align-middle"></i>
+        </label>`)
     this.toolbar.append(alignMiddle)
     alignMiddle.click(function (e) {
       context.cancelConnection()
@@ -268,10 +322,24 @@ export default class FlowDesigner {
         window._setDirty()
       }
     })
+    // const alignBottom=$(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Align Bottom">
+    //     <input type="radio" name="tools"> <i class="fd fd-align-bottom"></i>
+    // </label>`);
+    // this.toolbar.append(alignBottom);
+    // alignBottom.click(function (e) {
+    //     context.cancelConnection();
+    //     event.eventEmitter.emit(event.ALIGN_BOTTOM);
+    //     _this.nodeToolbar.children('label').removeClass('active');
+    //     context.currentTool=context.selectTool;
+    //     if(window._setDirty){
+    //         window._setDirty();
+    //     }
+    // });
+
     const sameSize =
-      $(`<button type="button" class="btn btn-default" style="border:none;border-radius:0" title="将选中的所有组件的尺寸设置为相同">
-             <i class="fd fd-samesize"></i>
-        </button>`)
+      $(`<label class="btn btn-default btn-light" style="border:none;border-radius:0" title="Same Size">
+            <input type="radio" name="tools"> <i class="fd fd-samesize"></i>
+        </label>`)
     this.toolbar.append(sameSize)
     sameSize.click(function (e) {
       context.cancelConnection()
@@ -288,7 +356,7 @@ export default class FlowDesigner {
   _buildNodeTools() {
     for (let tool of this.context.toolsMap.values()) {
       let tools = $(`
-                <label class="btn btn-default" style="border:none;border-radius:0" title="${tool.getType()}">
+                <label class="btn btn-default btn-light" style="border:none;border-radius:0" title="${tool.getType()}">
                     <input type="radio" name="tools" title="${tool.getType()}"> ${tool.getIcon()}
                 </label>
             `)
@@ -301,14 +369,35 @@ export default class FlowDesigner {
 
   _bindSelectionEvent() {
     const _this = this
+    const resetPropertyPanelPosition = () => {
+      /* if (_this.propertyPanel.length==0) return;
+            
+            let propertyDialog = _this.propertyPanel[0];
+            let toolbars = $(".btn-group");
+            let toolbarHeight = 0;
+            for (var i=0; i<toolbars.length; i++) {
+                toolbarHeight+=toolbars[i].clientHeight;
+            }
+            if (toolbars.length>0 && window.event instanceof MouseEvent && window.event.button==0) {
+                const innerHeight = window.innerHeight;
+                const pageOffsetY = window.event.pageY;
+                const dlgClientHeight = propertyDialog.clientHeight;
+                const topPosition = ((pageOffsetY+dlgClientHeight)<innerHeight)?pageOffsetY:(pageOffsetY-dlgClientHeight);
+                propertyDialog.style.top=topPosition+'px';
+
+                const innerWidth = window.innerWidth;
+                const pageOffsetX = window.event.pageX;
+                const dlgClientWidth = propertyDialog.clientWidth;
+                const leftPosition = ((pageOffsetX+dlgClientWidth+80)<innerWidth)?pageOffsetX+80:(pageOffsetX-dlgClientWidth-80);
+                propertyDialog.style.left = leftPosition+'px';
+            }  */
+    }
     event.eventEmitter.on(event.OBJECT_SELECTED, (target) => {
       this.propContainer.empty()
       if (target instanceof Node) {
         const name = target.name || target.text.attr('text')
-        const nameGroup = $(`<div class="form-group"><label>节点名称：</label></div>`)
-        const nameText = $(
-          `<input type="text" class="form-control" style="width: 305px;display: inline-block" value="${name}">`
-        )
+        const nameGroup = $(`<div class="form-group"><label>节点名称(Node Name)：</label></div>`)
+        const nameText = $(`<input type="text" class="form-control" value="${name}">`)
         nameGroup.append(nameText)
         this.propContainer.append(nameGroup)
         nameText.change(function (e) {
@@ -346,11 +435,11 @@ export default class FlowDesigner {
         })
         this.propContainer.append(target._tool.getPropertiesProducer().call(target))
       } else if (target instanceof Connection) {
-        const nameGroup = $(`<div class="form-group"><label>连线名称：</label></div>`)
+        const nameGroup = $(
+          `<div class="form-group"><label>连线名称(Connection Name)：</label></div>`
+        )
         const nameText = $(
-          `<input type="text" class="form-control" style="width: 305px;display: inline-block" value="${
-            target.name ? target.name : ''
-          }">`
+          `<input type="text" class="form-control" value="${target.name ? target.name : ''}">`
         )
         nameGroup.append(nameText)
         this.propContainer.append(nameGroup)
@@ -389,11 +478,10 @@ export default class FlowDesigner {
           })
         })
 
-        const lineTypeGroup = $(`<div class="form-group"><label>线型：</label></div>`)
-        const typeSelect =
-          $(`<select class="form-control"  style="width: 335px;display: inline-block">
-                    <option value="line">直线</option>
-                    <option value="curve">直角曲线</option>
+        const lineTypeGroup = $(`<div class="form-group"><label>线型(Line Style)：</label></div>`)
+        const typeSelect = $(`<select class="form-control">
+                    <option value="line">直线(Straight Line)</option>
+                    <option value="curve">直角曲线(Chamfer Curve)</option>
                 </select>`)
         lineTypeGroup.append(typeSelect)
         typeSelect.val(target.type)
@@ -402,6 +490,12 @@ export default class FlowDesigner {
             uuid = target.uuid,
             oldType = target.type
           target.type = type
+          if (type === 'line' && target.path) {
+            let paths = target.path.attr('path')
+            if (paths && paths.length > 2) {
+              target.path.attr('path', [paths[0], paths[paths.length - 1]])
+            }
+          }
           target.updatePath()
           _this.context.resetSelection()
           _this.context.addRedoUndo({
@@ -422,11 +516,13 @@ export default class FlowDesigner {
         })
         this.propContainer.append(lineTypeGroup)
         this.propContainer.append(target.from._tool.getConnectionPropertiesProducer().call(target))
+        resetPropertyPanelPosition()
       }
     })
     event.eventEmitter.on(event.CANVAS_SELECTED, () => {
       this.propContainer.empty()
       this.propContainer.append(this.getPropertiesProducer().call(this))
+      resetPropertyPanelPosition()
     })
     event.eventEmitter.emit(event.CANVAS_SELECTED)
   }
@@ -465,7 +561,7 @@ export default class FlowDesigner {
       })
       info = '<span style="color:orangered">错误：<br>' + info + '</span>'
       MsgBox.alert(info)
-      return false
+      throw info
     }
     return true
   }

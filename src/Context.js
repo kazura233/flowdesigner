@@ -3,12 +3,12 @@
  */
 import Raphael from 'raphael'
 import UndoManager from 'undo-manager'
-import uuid from 'node-uuid'
 import SelectTool from './tools/SelectTool.js'
 import ConnectionTool from './tools/ConnectionTool.js'
 import Connection from './Connection.js'
 import * as event from './event.js'
 import Node from './Node.js'
+import { v4 } from 'uuid'
 
 export default class Context {
   constructor(container) {
@@ -95,7 +95,7 @@ export default class Context {
   }
 
   nextUUID() {
-    return uuid.v1()
+    return v4()
   }
 
   getFigureById(id) {
@@ -199,23 +199,233 @@ export default class Context {
         this.removeFigureByUUID(uuid)
       })
     })
+    event.eventEmitter.on(event.ALIGN_LEFT, () => {
+      let x = -1,
+        y = -1,
+        w,
+        map = new Map(),
+        index = 0
+      let minX = -1,
+        minWidth = -1
+      for (let select of this.selectionFigures) {
+        if (select instanceof Connection) {
+          break
+        }
+        w = select.rect.attr('width')
+        const currentX = select.rect.attr('x')
+        if (minX == -1) {
+          minX = currentX
+          minWidth = w
+        } else {
+          if (minX > currentX) {
+            minX = currentX
+            minWidth = w
+          }
+        }
+      }
+      for (let select of this.selectionFigures) {
+        if (select instanceof Connection) {
+          break
+        }
+        w = select.rect.attr('width')
+        let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
+        select.moveTo(minX + w / 2, y)
+        data.newXY = { x: select.rect.attr('x'), y: select.rect.attr('y') }
+        map.set(select.uuid, data)
+        index++
+      }
+      const _this = this
+      this.addRedoUndo({
+        redo: function () {
+          for (let uuid of map.keys()) {
+            let node = _this.getNodeByUUID(uuid),
+              data = map.get(uuid)
+            const { newXY } = data
+            node.move(newXY.x, newXY.y, node.rect.attr('width'), node.rect.attr('height'))
+          }
+        },
+        undo: function () {
+          for (let uuid of map.keys()) {
+            let node = _this.getNodeByUUID(uuid),
+              data = map.get(uuid)
+            const { oldXY } = data
+            node.move(oldXY.x, oldXY.y, node.rect.attr('width'), node.rect.attr('height'))
+          }
+        }
+      })
+    })
     event.eventEmitter.on(event.ALIGN_CENTER, () => {
       let x = -1,
         y = -1,
         w,
         map = new Map(),
         index = 0
+      let selectRects = []
+      //collect area
       for (let select of this.selectionFigures) {
         if (select instanceof Connection) {
           break
         }
-        let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
-        if (index === 0) {
-          ;(x = select.rect.attr('x')), (w = select.rect.attr('width'))
-          x += w / 2
-        } else {
-          select.moveTo(x, y)
+        let center = select.rect.attr('y')
+        let height = select.rect.attr('height')
+        selectRects.push({
+          start: center - height / 2,
+          end: center + height / 2,
+          uuid: this.nextUUID()
+        })
+      }
+      //judeg area mixed
+      let mixed = false
+      for (let rect of selectRects) {
+        for (let rect2 of selectRects) {
+          if (
+            rect.uuid != rect2.uuid &&
+            ((rect.start >= rect2.start && rect.start <= rect2.end) ||
+              (rect.end >= rect2.start && rect.end <= rect2.end))
+          ) {
+            mixed = true
+            break
+          }
         }
+        if (mixed) {
+          break
+        }
+      }
+      if (!mixed) {
+        for (let select of this.selectionFigures) {
+          if (select instanceof Connection) {
+            break
+          }
+          let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
+          if (index === 0) {
+            ;(x = select.rect.attr('x')), (w = select.rect.attr('width'))
+            x += w / 2
+          } else {
+            select.moveTo(x, y)
+          }
+          data.newXY = { x: select.rect.attr('x'), y: select.rect.attr('y') }
+          map.set(select.uuid, data)
+          index++
+        }
+      } else {
+        for (let select of this.selectionFigures) {
+          if (select instanceof Connection) {
+            break
+          }
+          let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
+          let height
+          if (index === 0) {
+            x = select.rect.attr('x')
+            y = select.rect.attr('y')
+          } else {
+            height = select.rect.attr('height')
+            y = y + height / 2 + 100
+            select.move(x, y, select.rect.attr('width'), height)
+          }
+          data.newXY = { x: select.rect.attr('x'), y: select.rect.attr('y') }
+          map.set(select.uuid, data)
+          index++
+        }
+      }
+      const _this = this
+      this.addRedoUndo({
+        redo: function () {
+          for (let uuid of map.keys()) {
+            let node = _this.getNodeByUUID(uuid),
+              data = map.get(uuid)
+            const { newXY } = data
+            node.move(newXY.x, newXY.y, node.rect.attr('width'), node.rect.attr('height'))
+          }
+        },
+        undo: function () {
+          for (let uuid of map.keys()) {
+            let node = _this.getNodeByUUID(uuid),
+              data = map.get(uuid)
+            const { oldXY } = data
+            node.move(oldXY.x, oldXY.y, node.rect.attr('width'), node.rect.attr('height'))
+          }
+        }
+      })
+    })
+    event.eventEmitter.on(event.ALIGN_RIGHT, () => {
+      let x = -1,
+        y = -1,
+        w,
+        map = new Map(),
+        index = 0
+      let maxX = -1
+      for (let select of this.selectionFigures) {
+        if (select instanceof Connection) {
+          break
+        }
+        w = select.rect.attr('width')
+        const currentX = select.rect.attr('x') + w
+        if (maxX == -1) {
+          maxX = currentX
+        } else {
+          if (maxX < currentX) {
+            maxX = currentX
+          }
+        }
+      }
+      for (let select of this.selectionFigures) {
+        if (select instanceof Connection) {
+          break
+        }
+        w = select.rect.attr('width')
+        let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
+        select.moveTo(maxX - w / 2, y)
+        data.newXY = { x: select.rect.attr('x'), y: select.rect.attr('y') }
+        map.set(select.uuid, data)
+        index++
+      }
+      const _this = this
+      this.addRedoUndo({
+        redo: function () {
+          for (let uuid of map.keys()) {
+            let node = _this.getNodeByUUID(uuid),
+              data = map.get(uuid)
+            const { newXY } = data
+            node.move(newXY.x, newXY.y, node.rect.attr('width'), node.rect.attr('height'))
+          }
+        },
+        undo: function () {
+          for (let uuid of map.keys()) {
+            let node = _this.getNodeByUUID(uuid),
+              data = map.get(uuid)
+            const { oldXY } = data
+            node.move(oldXY.x, oldXY.y, node.rect.attr('width'), node.rect.attr('height'))
+          }
+        }
+      })
+    })
+    event.eventEmitter.on(event.ALIGN_TOP, () => {
+      let x = -1,
+        y = -1,
+        h,
+        map = new Map(),
+        index = 0
+      let minY = -1
+      for (let select of this.selectionFigures) {
+        if (select instanceof Connection) {
+          break
+        }
+        const currentY = select.rect.attr('y')
+        if (minY == -1) {
+          minY = currentY
+        } else {
+          if (minY > currentY) {
+            minY = currentY
+          }
+        }
+      }
+      for (let select of this.selectionFigures) {
+        if (select instanceof Connection) {
+          break
+        }
+        h = select.rect.attr('height')
+        let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
+        select.moveTo(x, minY + h / 2)
         data.newXY = { x: select.rect.attr('x'), y: select.rect.attr('y') }
         map.set(select.uuid, data)
         index++
@@ -243,20 +453,124 @@ export default class Context {
     event.eventEmitter.on(event.ALIGN_MIDDLE, () => {
       let x = -1,
         y = -1,
+        w,
         h,
         map = new Map(),
         index = 0
+      let selectRects = []
+      //collect area
       for (let select of this.selectionFigures) {
         if (select instanceof Connection) {
           break
         }
-        let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
-        if (index === 0) {
-          ;(y = select.rect.attr('y')), (h = select.rect.attr('height'))
-          y += h / 2
-        } else {
-          select.moveTo(x, y)
+        let center = select.rect.attr('x')
+        let width = select.rect.attr('width')
+        selectRects.push({
+          start: center - width / 2,
+          end: center + width / 2,
+          uuid: this.nextUUID()
+        })
+      }
+      //judeg area mixed
+      let mixed = false
+      for (let rect of selectRects) {
+        for (let rect2 of selectRects) {
+          if (
+            rect.uuid != rect2.uuid &&
+            ((rect.start >= rect2.start && rect.start <= rect2.end) ||
+              (rect.end >= rect2.start && rect.end <= rect2.end))
+          ) {
+            mixed = true
+            break
+          }
         }
+        if (mixed) {
+          break
+        }
+      }
+      if (!mixed) {
+        for (let select of this.selectionFigures) {
+          if (select instanceof Connection) {
+            break
+          }
+          let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
+          if (index === 0) {
+            ;(y = select.rect.attr('y')), (h = select.rect.attr('height'))
+            y += h / 2
+          } else {
+            select.moveTo(x, y)
+          }
+          data.newXY = { x: select.rect.attr('x'), y: select.rect.attr('y') }
+          map.set(select.uuid, data)
+          index++
+        }
+      } else {
+        for (let select of this.selectionFigures) {
+          if (select instanceof Connection) {
+            break
+          }
+          let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
+          if (index === 0) {
+            x = select.rect.attr('x')
+            y = select.rect.attr('y')
+          } else {
+            w = select.rect.attr('width')
+            x = x + w / 2 + 100
+            select.move(x, y, w, select.rect.attr('height'))
+          }
+          data.newXY = { x: select.rect.attr('x'), y: select.rect.attr('y') }
+          map.set(select.uuid, data)
+          index++
+        }
+      }
+      const _this = this
+      this.addRedoUndo({
+        redo: function () {
+          for (let uuid of map.keys()) {
+            let node = _this.getNodeByUUID(uuid),
+              data = map.get(uuid)
+            const { newXY } = data
+            node.move(newXY.x, newXY.y, node.rect.attr('width'), node.rect.attr('height'))
+          }
+        },
+        undo: function () {
+          for (let uuid of map.keys()) {
+            let node = _this.getNodeByUUID(uuid),
+              data = map.get(uuid)
+            const { oldXY } = data
+            node.move(oldXY.x, oldXY.y, node.rect.attr('width'), node.rect.attr('height'))
+          }
+        }
+      })
+    })
+    event.eventEmitter.on(event.ALIGN_BOTTOM, () => {
+      let x = -1,
+        y = -1,
+        h,
+        map = new Map(),
+        index = 0
+      let maxY = -1
+      for (let select of this.selectionFigures) {
+        if (select instanceof Connection) {
+          break
+        }
+        h = select.rect.attr('height')
+        const currentY = select.rect.attr('y') + h
+        if (maxY == -1) {
+          maxY = currentY
+        } else {
+          if (maxY < currentY) {
+            maxY = currentY
+          }
+        }
+      }
+      for (let select of this.selectionFigures) {
+        if (select instanceof Connection) {
+          break
+        }
+        h = select.rect.attr('height')
+        let data = { oldXY: { x: select.rect.attr('x'), y: select.rect.attr('y') } }
+        select.moveTo(x, maxY - h / 2)
         data.newXY = { x: select.rect.attr('x'), y: select.rect.attr('y') }
         map.set(select.uuid, data)
         index++

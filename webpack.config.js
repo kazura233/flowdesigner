@@ -11,7 +11,6 @@ module.exports = {
     path: path.resolve('./sample'),
     filename: '[name].bundle.js'
   },
-
   module: {
     rules: [
       {

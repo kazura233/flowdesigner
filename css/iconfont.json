@@ -1,0 +1,163 @@
+{
+  "id": "3749035",
+  "name": "flowdesigner",
+  "font_family": "fd",
+  "css_prefix_text": "fd-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "372242",
+      "name": "cc-redo",
+      "font_class": "redo",
+      "unicode": "e692",
+      "unicode_decimal": 59026
+    },
+    {
+      "icon_id": "372267",
+      "name": "cc-undo",
+      "font_class": "undo",
+      "unicode": "e6ab",
+      "unicode_decimal": 59051
+    },
+    {
+      "icon_id": "18170996",
+      "name": "地图连线竖,连接,连线",
+      "font_class": "map-link",
+      "unicode": "ea01",
+      "unicode_decimal": 59905
+    },
+    {
+      "icon_id": "18170999",
+      "name": "地图连线,连线,连接",
+      "font_class": "line",
+      "unicode": "ea02",
+      "unicode_decimal": 59906
+    },
+    {
+      "icon_id": "4767062",
+      "name": "align-right",
+      "font_class": "align-right",
+      "unicode": "e7f5",
+      "unicode_decimal": 59381
+    },
+    {
+      "icon_id": "4767063",
+      "name": "align-center",
+      "font_class": "align-center1",
+      "unicode": "e7f6",
+      "unicode_decimal": 59382
+    },
+    {
+      "icon_id": "4767064",
+      "name": "align-left",
+      "font_class": "align-left",
+      "unicode": "e7f7",
+      "unicode_decimal": 59383
+    },
+    {
+      "icon_id": "11348867",
+      "name": "align-mid",
+      "font_class": "align-mid",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "11348872",
+      "name": "align-top",
+      "font_class": "align-top",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "32756344",
+      "name": "align-top-copy",
+      "font_class": "align-bottom",
+      "unicode": "eb87",
+      "unicode_decimal": 60295
+    },
+    {
+      "icon_id": "22624156",
+      "name": "开启",
+      "font_class": "icon_start",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "25842840",
+      "name": "停止",
+      "font_class": "tingzhi",
+      "unicode": "e6de",
+      "unicode_decimal": 59102
+    },
+    {
+      "icon_id": "11487977",
+      "name": "arrow-right",
+      "font_class": "arrow-right",
+      "unicode": "e743",
+      "unicode_decimal": 59203
+    },
+    {
+      "icon_id": "32743396",
+      "name": "arrow-right-copy",
+      "font_class": "arrow-down",
+      "unicode": "eb86",
+      "unicode_decimal": 60294
+    },
+    {
+      "icon_id": "32668123",
+      "name": "AlignCenterHorizontal-copy",
+      "font_class": "align-middle",
+      "unicode": "eb84",
+      "unicode_decimal": 60292
+    },
+    {
+      "icon_id": "373290",
+      "name": "cc-delete",
+      "font_class": "delete",
+      "unicode": "e6c9",
+      "unicode_decimal": 59081
+    },
+    {
+      "icon_id": "1160810",
+      "name": "magnet",
+      "font_class": "snapto",
+      "unicode": "e83a",
+      "unicode_decimal": 59450
+    },
+    {
+      "icon_id": "7206234",
+      "name": "Arrow",
+      "font_class": "select",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    },
+    {
+      "icon_id": "10564361",
+      "name": "resize-3",
+      "font_class": "resize-",
+      "unicode": "e718",
+      "unicode_decimal": 59160
+    },
+    {
+      "icon_id": "13691785",
+      "name": "resize_2",
+      "font_class": "samesize",
+      "unicode": "e8ac",
+      "unicode_decimal": 59564
+    },
+    {
+      "icon_id": "23562385",
+      "name": "AlignCenterHorizontal",
+      "font_class": "align-center",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "23931250",
+      "name": "share-line",
+      "font_class": "share-line",
+      "unicode": "e6a2",
+      "unicode_decimal": 59042
+    }
+  ]
+}

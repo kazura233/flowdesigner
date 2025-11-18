@@ -1,9 +1,10 @@
 {
   "name": "flowdesigner",
-  "version": "1.1.61",
+  "version": "1.1.77",
   "description": "FlowDesigner is a js library for drawing flow chart on web",
   "main": "index.js",
   "scripts": {
+    "dev": "webpack -d source-map --watch",
     "build": "babel -c -d ./lib ./src/ --presets env",
     "prepublish": "npm run build"
   },
@@ -14,14 +15,15 @@
   "author": "Jacky.Gao",
   "license": "MIT",
   "dependencies": {
-    "bootstrap": "^3.3.6",
+    "bootstrap": "^3.4.1",
     "events": "^1.1.1",
     "jquery": "^2.1.0",
-    "node-uuid": "^1.4.7",
-    "raphael": "^2.2.1",
-    "undo-manager": "^1.0.5"
+    "raphael": "^2.3.0",
+    "undo-manager": "^1.0.5",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.6.1",
@@ -29,6 +31,8 @@
     "expose-loader": "^0.7.5",
     "file-loader": "^1.1.11",
     "style-loader": "^0.13.1",
-    "url-loader": "^0.5.7"
+    "url-loader": "^0.5.7",
+    "webpack": "^5.52.0",
+    "webpack-cli": "^4.8.0"
   }
 }

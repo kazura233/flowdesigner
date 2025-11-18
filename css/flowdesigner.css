@@ -9,6 +9,11 @@
   width: 100%;
   background: #fff;
 }
+.fd-workspace {
+  width: 100%;
+  height: calc(100vh - 80px);
+  overflow: auto;
+}
 .fd-canvas-container {
   border: solid 1px #eee;
   background-color: #ffffff;
@@ -17,12 +22,31 @@
   width: 400px;
   border: solid 1px #999;
   border-radius: 5px;
-  top: -550px;
-  left: 500px;
-  position: relative;
+  top: 100px;
+  left: calc(100vw - 410px);
+  position: fixed;
   background: #ffffff;
   box-shadow: 5px 5px 5px #888888;
 }
+.fd-horizontalLine,
+.fd-verticalLine {
+  position: absolute;
+  display: none;
+  border-color: #636e72;
+}
+
+.fd-horizontalLine {
+  border-bottom-style: dashed;
+  width: 100%;
+  border-bottom-width: 2px;
+}
+
+.fd-verticalLine {
+  border-left-style: dashed;
+  width: 100%;
+  border-left-width: 2px;
+}
+
 .snaptogrid {
   background-image: url('grid-bg.png');
 }

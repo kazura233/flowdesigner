@@ -1,8 +1,9 @@
 @font-face {
   font-family: 'fd';
-  src: url('iconfont.eot');
-  src: url('iconfont.eot') format('embedded-opentype'), url('iconfont.woff') format('woff'),
-    url('iconfont.ttf') format('truetype'), url('iconfont.svg') format('svg');
+  src: url('iconfont.woff2?t=1668579324089') format('woff2'),
+    url('iconfont.woff?t=1668579324089') format('woff'),
+    url('iconfont.ttf?t=1668579324089') format('truetype'),
+    url('iconfont.svg?t=1668579324089#fd') format('svg');
 }
 
 .fd {
@@ -10,33 +11,93 @@
   font-size: 16px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
-  -webkit-text-stroke-width: 0.2px;
   -moz-osx-font-smoothing: grayscale;
 }
-.fd-delete:before {
+
+.fd-redo:before {
+  content: '\e692';
+}
+
+.fd-undo:before {
+  content: '\e6ab';
+}
+
+.fd-map-link:before {
+  content: '\ea01';
+}
+
+.fd-line:before {
+  content: '\ea02';
+}
+
+.fd-align-right:before {
+  content: '\e7f5';
+}
+
+.fd-align-center1:before {
+  content: '\e7f6';
+}
+
+.fd-align-left:before {
+  content: '\e7f7';
+}
+
+.fd-align-mid:before {
+  content: '\e604';
+}
+
+.fd-align-top:before {
   content: '\e605';
 }
-.fd-undo:before {
-  content: '\e609';
+
+.fd-align-bottom:before {
+  content: '\eb87';
 }
-.fd-snapto:before {
-  content: '\e603';
+
+.fd-icon_start:before {
+  content: '\e600';
 }
-.fd-redo:before {
-  content: '\e60a';
+
+.fd-tingzhi:before {
+  content: '\e6de';
 }
-.fd-select:before {
-  content: '\e601';
+
+.fd-arrow-right:before {
+  content: '\e743';
 }
-.fd-align-center:before {
-  content: '\e607';
+
+.fd-arrow-down:before {
+  content: '\eb86';
 }
+
 .fd-align-middle:before {
-  content: '\e608';
+  content: '\eb84';
 }
-.fd-line:before {
-  content: '\e602';
+
+.fd-delete:before {
+  content: '\e6c9';
 }
+
+.fd-snapto:before {
+  content: '\e83a';
+}
+
+.fd-select:before {
+  content: '\e648';
+}
+
+.fd-resize-:before {
+  content: '\e718';
+}
+
 .fd-samesize:before {
-  content: '\e606';
+  content: '\e8ac';
+}
+
+.fd-align-center:before {
+  content: '\e642';
+}
+
+.fd-share-line:before {
+  content: '\e6a2';
 }

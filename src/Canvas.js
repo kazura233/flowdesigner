@@ -66,12 +66,13 @@ export default class Canvas {
       connection.endY = y
       connection.updatePath()
     })
-
+    let dragState = false
     function dragStart(x, y, event) {
       const currentTool = context.currentTool
       if (!currentTool || !(currentTool instanceof SelectTool)) {
         return
       }
+      dragState = true
       selectionBox = paper.rect(event.offsetX, event.offsetY, 0, 0).attr('stroke', '#9999FF')
     }
 
@@ -96,6 +97,10 @@ export default class Canvas {
     }
 
     function dragEnd(event) {
+      if (!dragState) {
+        return
+      }
+      dragState = false
       const currentTool = context.currentTool
       if (!currentTool || !(currentTool instanceof SelectTool)) {
         return
